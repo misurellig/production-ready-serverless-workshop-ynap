@@ -254,4 +254,108 @@ and there should be an `output.txt` file inside the `terraform` folder. Open it 
 {"statusCode":200,"body":"{\"input\":{}}"}
 ```
 
+19. By now, your project folder should look something like this:
+
+```
+functions
+  |-- hello.js
+terraform
+  |-- hello.tf
+  |-- provider.tf
+  |-- variables.tf
+package.json
+```
+
+</p></details>
+
+<details>
+<summary><b>HOW TO create and deploy an API in API Gateway</b></summary><p>
+
+1. In the `terraform` folder, add a file, call it `apigateway.tf`
+
+2. Copy the following into `apigateway.tf`
+
+```terraform
+resource "aws_api_gateway_rest_api" "api" {
+  name        = "production-ready-serverless-${var.my_name}"
+}
+
+resource "aws_api_gateway_resource" "hello" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
+  path_part   = "hello"
+}
+
+resource "aws_api_gateway_method" "hello-get" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.hello.id}"
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "hello-lambda" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_method.hello-get.resource_id}"
+  http_method = "${aws_api_gateway_method.hello-get.http_method}"
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = "${aws_lambda_function.hello.invoke_arn}"
+}
+
+resource "aws_api_gateway_deployment" "api" {
+  depends_on = [
+    "aws_api_gateway_integration.hello-lambda"
+  ]
+
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  stage_name  = "dev"
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.hello.arn}"
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/* portion grants access from any method on any resource
+  # within the API Gateway "REST API".
+  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+}
+```
+
+This creates a new REST API resource in API Gateway and sets up the integration with the `hello` Lambda function we created earlier.
+
+3. While in the `terraform` folder, run the command `terraform apply -var 'my_name=xxx'` **replace xxx with your name**
+
+e.g. `terraform apply -var 'my_name=yancui'`
+
+and enter `yes` when prompted to confirm the deployment.
+
+4. Once the deployment finishes, you can navigate to the API Gateway console and find the newly deployed API there.
+
+![](/images/mod01-001.png)
+
+5. Click on `stages`, `dev`, and note the `Invoke URL`.
+
+![](/images/mod01-002.png)
+
+it should be of the format `https://xxx.execute-api.us-east-1.amazonaws.com/dev` where `xxx` is replaced with the ID of the REST API.
+
+Clicking on the link should return an `Missing Authentication Token` error.
+
+```json
+{
+  "message": "Missing Authentication Token"
+}
+```
+
+Don't worry, this is API Gateway's way of saying the URL you requested does not exist (no, I don't know why it's not a 404 error instead...)
+
+6. Take the invoke URL from the previous step and add a subpath `/hello` and now it should return a JOSN payload.
+
+![](/images/mod01-003.png)
+
+Congratulations! You have now deployed your first API backed by Lambda.
+
 </p></details>
