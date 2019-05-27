@@ -581,7 +581,7 @@ resource "aws_dynamodb_table" "restaurants_table" {
 
 ```terraform
 resource "aws_iam_policy" "get_restaurants_lambda_dynamodb_policy" {
-  name = "dynamodb_scan"
+  name = "get_restaurants_dynamodb_scan"
   path = "/"
   policy = <<EOF
 {
@@ -924,3 +924,440 @@ Once the deployment is finished, you should be able to go to the root URL of pro
 
 </p>
 </details>
+
+## Create POST /restaurants/search endpoint
+
+**Goal:** Set up a `/restaurants/search` endpoint for searching restaurants by theme.
+
+<details>
+<summary><b>Add search-restaurants function</b></summary><p>
+
+1. In the `functions` folder, add a new file called `search-restaurants.js`.
+
+2. Copy the following into `functions/search-restaurants.js`
+
+```javascript
+const AWS = require('aws-sdk')
+const dynamodb = new AWS.DynamoDB.DocumentClient()
+
+const defaultResults = process.env.defaultResults || 8
+const tableName = process.env.restaurants_table
+
+const findRestaurantsByTheme = async (theme, count) => {
+  const req = {
+    TableName: tableName,
+    Limit: count,
+    FilterExpression: "contains(themes, :theme)",
+    ExpressionAttributeValues: { ":theme": theme }
+  }
+
+  const resp = await dynamodb.scan(req).promise()
+  return resp.Items
+}
+
+module.exports.handler = async (event, context) => {
+  const req = JSON.parse(event.body)
+  const theme = req.theme
+  const restaurants = await findRestaurantsByTheme(theme, defaultResults)
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify(restaurants)
+  }
+
+  return response
+}
+```
+
+</p></details>
+
+<details>
+<summary><b>Add the Terraform scripts</b></summary><p>
+
+1. In the `terraform` folder, add a file called `search-restaurants.tf`
+
+2. Copy the following into `terraform/search-restaurants.tf`
+
+```terraform
+resource "aws_lambda_function" "search_restaurants" {
+  function_name = "${local.function_prefix}-search-restaurants"
+
+  s3_bucket = "${local.deployment_bucket}"
+  s3_key    = "${local.deployment_key}"
+
+  handler = "functions/search-restaurants.handler"
+  runtime = "nodejs8.10"
+
+  role = "${aws_iam_role.search_restaurants_lambda_role.arn}"
+
+  environment {
+    variables = {
+      restaurants_table = "restaurants_${var.my_name}"
+    }
+  }
+}
+
+# IAM role which dictates what other AWS services the hello function can access
+resource "aws_iam_role" "search_restaurants_lambda_role" {
+  name = "${local.function_prefix}-search-restaurants-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "search_restaurants_lambda_role_policy" {
+  role       = "${aws_iam_role.search_restaurants_lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_policy" "search_restaurants_lambda_dynamodb_policy" {
+  name = "search_restaurants_dynamodb_scan"
+  path = "/"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "dynamodb:scan",
+      "Resource": "${aws_dynamodb_table.restaurants_table.arn}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "search_restaurants_lambda_dynamodb_policy" {
+  role       = "${aws_iam_role.search_restaurants_lambda_role.name}"
+  policy_arn = "${aws_iam_policy.search_restaurants_lambda_dynamodb_policy.arn}"
+}
+```
+
+3. Open `terraform/apigateway.tf`, and **add** the following to the end of the file
+
+```terraform
+# SEARCH-RESTAURANTS
+resource "aws_api_gateway_resource" "search_restaurants" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  parent_id   = "${aws_api_gateway_resource.get_restaurants.id}"
+  path_part   = "search"
+}
+
+resource "aws_api_gateway_method" "search_restaurants_post" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.search_restaurants.id}"
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "search_restaurants_lambda" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_method.search_restaurants_post.resource_id}"
+  http_method = "${aws_api_gateway_method.search_restaurants_post.http_method}"
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = "${aws_lambda_function.search_restaurants.invoke_arn}"
+}
+
+resource "aws_lambda_permission" "apigw_search_restaurants" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.search_restaurants.arn}"
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+}
+```
+
+4. Staying in the `terraform/apigateway.tf` file, look for the resource `aws_api_gateway_deployment.api` and **replace** it with the following
+
+```terraform
+resource "aws_api_gateway_deployment" "api" {
+  depends_on = [
+    "aws_api_gateway_integration.get_index_lambda",
+    "aws_api_gateway_integration.get_restaurants_lambda",
+    "aws_api_gateway_integration.search_restaurants_lambda"
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  stage_name  = "dev"
+
+  variables {
+    deployed_at = "${timestamp()}"
+  }
+}
+```
+
+5. Redeploy the project by running the command `./build.sh deploy dev`
+
+6. Once the deployment is done, curl the `/restaurants/search` endpoint for the `cartoon` theme. **Don't forget to change the url to invoke URL from the Terraform output**
+
+`curl -d '{"theme":"cartoon"}' -H "Content-Type: application/json" -X POST https://xxx-api.us-east-1.amazonaws.com/dev/restaurants/search`
+
+and you should see that the response is
+
+```json
+[
+  {
+    "name": "Shoney's",
+    "image": "https:\/\/d2qt42rcwzspd6.cloudfront.net\/manning\/shoney's.png",
+    "themes": [
+      "cartoon",
+      "rick and morty"
+    ]
+  },
+  {
+    "name": "Lil' Bits",
+    "image": "https:\/\/d2qt42rcwzspd6.cloudfront.net\/manning\/lil+bits.png",
+    "themes": [
+      "cartoon",
+      "rick and morty"
+    ]
+  },
+  {
+    "name": "Fancy Eats",
+    "image": "https:\/\/d2qt42rcwzspd6.cloudfront.net\/manning\/fancy+eats.png",
+    "themes": [
+      "cartoon",
+      "rick and morty"
+    ]
+  },
+  {
+    "name": "Don Cuco",
+    "image": "https:\/\/d2qt42rcwzspd6.cloudfront.net\/manning\/don%20cuco.png",
+    "themes": [
+      "cartoon",
+      "rick and morty"
+    ]
+  }
+]
+```
+
+</p></details>
+
+<details>
+<summary><b>Integrate the index.html with the /restaurants/search endpoint</b></summary><p>
+
+1. **Replace** the content of `static/index.html` with the following
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Big Mouth</title>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" 
+            integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX" 
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    
+    <style>
+      .fullscreenDiv {
+        background-color: #05bafd;
+        width: 100%;
+        height: auto;
+        bottom: 0px;
+        top: 0px;
+        left: 0;
+        position: absolute;
+      }
+      .restaurantsDiv {
+        background-color: #ffffff;
+        width: 100%;
+        height: auto;
+      }
+      .dayOfWeek {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 32px;
+        padding: 10px;
+        height: auto;
+        display: flex;
+        justify-content: center;
+      }
+      .column-container {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: flex;
+        flex-flow: column;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .row-container {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .item {
+        padding: 5px;
+        height: auto;
+        margin-top: 10px;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .restaurant {
+        background-color: #00a8f7;
+        border-radius: 10px;
+        padding: 5px;
+        height: auto;
+        width: auto;
+        margin-left: 40px;
+        margin-right: 40px;
+        margin-top: 15px;
+        margin-bottom: 0px;
+        display: flex;
+        justify-content: center;
+      }
+      .restaurant-name {
+        font-size: 24px;
+        font-family:Arial, Helvetica, sans-serif;
+        color: #ffffff;
+        padding: 10px;
+        margin: 0px;
+      }
+      .restaurant-image {
+        padding-top: 0px;
+        margin-top: 0px;
+      }
+      input {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+      }
+      button {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+      }
+    </style>
+
+    <script>
+      const SEARCH_URL = '{{& searchUrl}}';
+
+      function searchRestaurants() {
+        var theme = $("#theme")[0].value;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', SEARCH_URL, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ theme }));
+
+        xhr.onreadystatechange = function (e) {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            var restaurants = JSON.parse(xhr.responseText);
+            var restaurantsList = $("#restaurantsUl");
+            restaurantsList.empty();
+
+            for (var restaurant of restaurants) {
+              restaurantsList.append(`
+              <li class="restaurant">
+                <ul class="column-container">
+                    <li class="item restaurant-name">${restaurant.name}</li>
+                    <li class="item restaurant-image">
+                      <img src="${restaurant.image}">
+                    </li>
+                </ul>
+              </li>
+              `);
+            }
+
+          } else if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+          }
+        };
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="fullscreenDiv">
+      <ul class="column-container">
+        <li class="item">
+          <img id="logo" src="https://d2qt42rcwzspd6.cloudfront.net/manning/big-mouth.png">
+        </li>
+        <li class="item">
+          <input id="theme" type="text" size="50" placeholder="enter a theme, eg. cartoon"/>
+          <button onclick="searchRestaurants()">Find Restaurants</button>
+        </li>
+        <li>
+          <div class="restaurantsDiv column-container">
+            <b class="dayOfWeek">{{dayOfWeek}}</b>
+            <ul id="restaurantsUl" class="row-container">
+              {{#restaurants}}
+              <li class="restaurant">
+                <ul class="column-container">
+                    <li class="item restaurant-name">{{name}}</li>
+                    <li class="item restaurant-image">
+                      <img src="{{image}}">
+                    </li>
+                </ul>
+              </li>
+              {{/restaurants}}
+            </ul> 
+          </div>
+        </li>
+      </ul>
+  </div>
+  </body>
+
+</html>
+```
+
+This new version of `index.html` expects the URL to the search endpoint to be passed in via the `moustache` template. So we need to update the `get-index` function to pass it in.
+
+2. Open `functions/get-index.js` and replace the exported `handler` property with the following
+
+```javascript
+module.exports.handler = async (event, context) => {
+  const template = loadHtml()
+  const restaurants = await getRestaurants()
+  const dayOfWeek = days[new Date().getDay()]
+  const html = Mustache.render(template, {
+    dayOfWeek,
+    restaurants,
+    searchUrl: `${restaurantsApiRoot}/search`
+  })
+  const response = {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=UTF-8'
+    },
+    body: html
+  }
+
+  return response
+}
+```
+
+3. Redeploy the project by running `./build.sh deploy dev`
+
+4. Once deployed, refresh the page and enter `cartoon` in the search box and click `Find Restaurants`, and see that the results are returned
+
+![](/images/mod02-003.png)
+
+</p></details>
