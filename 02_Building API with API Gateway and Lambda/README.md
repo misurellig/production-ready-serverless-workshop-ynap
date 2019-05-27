@@ -318,6 +318,10 @@ resource "aws_api_gateway_deployment" "api" {
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name  = "dev"
+
+  variables {
+    deployed_at = "${timestamp()}"
+  }
 }
 ```
 
@@ -533,6 +537,10 @@ resource "aws_api_gateway_deployment" "api" {
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name  = "dev"
+
+  variables {
+    deployed_at = "${timestamp()}"
+  }
 }
 ```
 
