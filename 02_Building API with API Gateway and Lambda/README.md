@@ -325,9 +325,9 @@ resource "aws_api_gateway_deployment" "api" {
 }
 ```
 
-8. In the `terraform` folder, add another file `output.tf` so we can the invoke URL for our API and so on.
+8. In the `terraform` folder, add another file `outputs.tf` so we can the invoke URL for our API and so on.
 
-9. Copy the following into `terraform/output.tf`
+9. Copy the following into `terraform/outputs.tf`
 
 ```terraform
 data "aws_caller_identity" "current" {}
