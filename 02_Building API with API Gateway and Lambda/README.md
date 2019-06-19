@@ -317,7 +317,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "dev"
+  stage_name  = "${var.stage}"
 
   variables {
     deployed_at = "${timestamp()}"
@@ -467,7 +467,7 @@ resource "aws_lambda_function" "get_restaurants" {
 
   environment {
     variables = {
-      restaurants_table = "restaurants_${var.my_name}"
+      restaurants_table = "${aws_dynamodb_table.restaurants_table.name}"
     }
   }
 }
@@ -552,7 +552,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "dev"
+  stage_name  = "${var.stage}"
 
   variables {
     deployed_at = "${timestamp()}"
@@ -566,7 +566,7 @@ resource "aws_api_gateway_deployment" "api" {
 
 ```terraform
 resource "aws_dynamodb_table" "restaurants_table" {
-  name           = "restaurants_${var.my_name}"
+  name           = "restaurants_${var.stage}_${var.my_name}"
   billing_mode   = "PAY_PER_REQUEST"  
   hash_key       = "name"
 
@@ -607,7 +607,7 @@ resource "aws_iam_role_policy_attachment" "get_restaurants_lambda_dynamodb_polic
 </details>
 
 <details>
-<summary><b>Deploy the serverless project</b></summary><p>
+<summary><b>Deploy the project</b></summary><p>
 
 1. Run the command `./build.sh deploy dev` and answer `yes` to confirm the deployment.
 
@@ -619,7 +619,7 @@ resource "aws_iam_role_policy_attachment" "get_restaurants_lambda_dynamodb_polic
 
 1. Add a file `seed-restaurants.js` to the project root
 
-2. Modify `seed-restaurants.js` to the following (make sure you change `restaurants_<suffix>` to your table name):
+2. Modify `seed-restaurants.js` to the following (make sure you change `restaurants_dev_<suffix>` to your table name):
 
 ```javascript
 const AWS = require('aws-sdk')
@@ -677,7 +677,7 @@ let putReqs = restaurants.map(x => ({
 
 let req = {
   RequestItems: {
-    'restaurants_<suffix>': putReqs
+    'restaurants_dev_<suffix>': putReqs
   }
 }
 dynamodb.batchWrite(req).promise().then(() => console.log("all done"))
@@ -991,7 +991,7 @@ resource "aws_lambda_function" "search_restaurants" {
 
   environment {
     variables = {
-      restaurants_table = "restaurants_${var.my_name}"
+      restaurants_table = "${aws_dynamodb_table.restaurants_table.name}"
     }
   }
 }
@@ -1097,7 +1097,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "dev"
+  stage_name  = "${var.stage}"
 
   variables {
     deployed_at = "${timestamp()}"
