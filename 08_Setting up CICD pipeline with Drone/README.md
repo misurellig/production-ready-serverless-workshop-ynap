@@ -99,6 +99,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -222,6 +224,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -235,6 +239,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -267,6 +273,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -280,6 +288,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -296,6 +306,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -320,6 +332,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -333,6 +347,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -349,6 +365,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
@@ -362,6 +380,8 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
+      STAGE: dev
+      REGION: us-east-1
     when:
       event:
         - push
