@@ -1064,7 +1064,13 @@ resource "aws_iam_policy" "notify_restaurant_lambda_policy" {
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "kinesis:PutRecord",
+      "Action": [
+        "kinesis:PutRecord",
+        "kinesis:GetRecords",
+        "kinesis:GetShardIterator",
+        "kinesis:DescribeStream",
+        "kinesis:ListStreams"
+      ],
       "Resource": "${aws_kinesis_stream.orders_stream.arn}"
     },
     {
@@ -1081,9 +1087,114 @@ resource "aws_iam_role_policy_attachment" "notify_restaurant_lambda_policy" {
   role       = "${aws_iam_role.notify_restaurant_lambda_role.name}"
   policy_arn = "${aws_iam_policy.notify_restaurant_lambda_policy.arn}"
 }
+
+resource "aws_lambda_event_source_mapping" "notify_restaurant_lambda_kinesis" {
+  event_source_arn  = "${aws_kinesis_stream.orders_stream.arn}"
+  function_name     = "${aws_lambda_function.notify_restaurant.arn}"
+  starting_position = "LATEST"
+  batch_size        = 10
+}
 ```
 
-3. Commit and push your changes.
+3. Because we had added a new `lib` folder that needs to be included in the artefact, we need to update our build scripts to include it.
+
+First, let's update our `build.sh` that we use locally, **replace** `build.sh` with the following:
+
+```bash
+#!/bin/bash
+set -e
+set -o pipefail
+
+instruction()
+{
+  echo "usage: ./build.sh deploy <stage>"
+  echo ""
+  echo "stage: eg. dev, staging, prod, ..."
+  echo ""
+  echo "for example: ./deploy.sh dev"
+}
+
+if [ $# -eq 0 ]; then
+  instruction
+  exit 1
+elif [ "$1" = "deploy" ] && [ $# -eq 2 ]; then
+  STAGE=$2
+
+  npm ci
+  zip -r workshop.zip functions static node_modules lib
+
+  MD5=$(md5 -q workshop.zip)
+  aws s3 cp workshop.zip s3://ynap-production-ready-serverless-yancui/workshop/$MD5.zip
+  
+  cd terraform
+  terraform apply --var "my_name=yancui" --var "file_name=$MD5"
+else
+  instruction
+  exit 1
+fi
+```
+
+4. Because we use a separate `build.js` in the CI/CD pipeline (remember, this is forced by the constraint of not having a custom Docker image), we also need to update it as well.
+
+**Replace** `build.js` with the following:
+
+```javascript
+const fs = require('fs')
+const archiver = require('archiver')
+const md5File = require('md5-file')
+const AWS = require('aws-sdk')
+const S3 = new AWS.S3()
+
+const output = fs.createWriteStream(__dirname + '/workshop.zip')
+const archive = archiver('zip')
+
+const [node, path, myName, ...rest] = process.argv
+const Bucket = `ynap-production-ready-serverless-${myName}`
+
+console.log(`deployment bucket is ${Bucket}`)
+
+output.on('close', function () {
+  console.log('deployment artefact created')
+
+  md5File('workshop.zip', (err, md5) => {
+    if (err) {
+      throw err
+    }
+
+    const filename = `workshop/${md5}.zip`
+    console.log(`uploading to S3 as ${filename}`)
+
+    S3.upload({
+      Bucket,
+      Key: filename,
+      Body: fs.createReadStream(__dirname + '/workshop.zip')
+    }, (err, resp) => {
+      if (err) {
+        throw err
+      }
+      
+      console.log('artefact has been uploaded to S3')
+      
+      fs.writeFileSync('workshop_md5.txt', md5)
+    })
+  })
+})
+
+archive.on('error', function(err){
+  throw err
+})
+
+archive.pipe(output)
+
+archive.directory('functions')
+archive.directory('static')
+archive.directory('node_modules')
+archive.directory('lib')
+
+archive.finalize()
+```
+
+5. Commit and push your changes, make sure the CICD pipeline still works.
 
 </p></details>
 
@@ -1470,5 +1581,40 @@ invoking via HTTP POST https://sr73zpk0el.execute-api.us-east-1.amazonaws.com/de
 
   4 passing (2s)
 ```
+
+</p></details>
+
+<details>
+<summary><b>Subscribe yourself to the SNS topics</b></summary><p>
+
+1. Go to SNS console
+
+2. Find your restaurant notification topic
+
+![](/images/mod11-002.png)
+
+3. Click `Create subscription`
+
+4. Choose `Email` for `Protocol` and enter your email
+
+5. Click `Create subscription`
+
+![](/images/mod11-003.png)
+
+6. Check your email, and look for an email from `AWS Notification - Subscription Confirmation`
+
+![](/images/mod11-004.png)
+
+7. Click the `Confirm subscription` link
+
+![](/images/mod11-005.png)
+
+Ok, now you have subscribed yourself to the SNS topics, so we can see how the messages look when they have been processed.
+
+8. Great! Reload the landing page in the browser and try to place a few orders.
+
+You should receive emails from SNS like this:
+
+![](/images/mod11-006.png)
 
 </p></details>
