@@ -163,8 +163,8 @@ const init = async () => {
 
 ```json
 "scripts": {
-  "test": "TEST_MODE=handler mocha tests/test_cases --reporter spec",
-  "acceptance": "TEST_MODE=http mocha tests/test_cases --reporter spec"
+  "test": "TEST_MODE=handler mocha tests/test_cases --reporter spec --timeout 5000",
+  "acceptance": "TEST_MODE=http mocha tests/test_cases --reporter spec --timeout 10000"
 },
 ```
 
