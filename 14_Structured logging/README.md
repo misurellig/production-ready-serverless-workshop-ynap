@@ -254,6 +254,7 @@ resource "aws_lambda_function" "get_index" {
   runtime = "nodejs8.10"
 
   role = "${aws_iam_role.get_index_lambda_role.arn}"
+  timeout = 6
 
   environment {
     variables = {
