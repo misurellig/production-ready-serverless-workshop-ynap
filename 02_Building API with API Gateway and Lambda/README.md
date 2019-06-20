@@ -267,7 +267,7 @@ resource "aws_lambda_permission" "apigw" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 
@@ -300,7 +300,7 @@ resource "aws_lambda_permission" "apigw_get_index" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 
@@ -317,7 +317,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.stage}"
+  stage_name  = ""
 
   variables {
     deployed_at = "${timestamp()}"
@@ -337,7 +337,7 @@ output "account_id" {
 }
 
 output "invoke_url" {
-  value = "${aws_api_gateway_deployment.api.invoke_url}"
+  value = "${aws_api_gateway_stage.stage.invoke_url}"
 }
 ```
 
@@ -534,7 +534,7 @@ resource "aws_lambda_permission" "apigw_get_restaurants" {
   function_name = "${aws_lambda_function.get_restaurants.arn}"
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 
@@ -552,7 +552,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.stage}"
+  stage_name  = ""
 
   variables {
     deployed_at = "${timestamp()}"
@@ -1078,7 +1078,7 @@ resource "aws_lambda_permission" "apigw_search_restaurants" {
   function_name = "${aws_lambda_function.search_restaurants.arn}"
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 
@@ -1097,7 +1097,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.stage}"
+  stage_name  = ""
 
   variables {
     deployed_at = "${timestamp()}"
