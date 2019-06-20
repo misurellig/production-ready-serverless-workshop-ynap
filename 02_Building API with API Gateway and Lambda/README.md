@@ -22,7 +22,7 @@ function loadHtml () {
     html = fs.readFileSync('static/index.html', 'utf-8')
     console.log('loaded')
   }
-  
+
   return html
 }
 
@@ -61,7 +61,7 @@ Also note that the variable `html` is declared outside the `handler` function. A
   <head>
     <meta charset="UTF-8">
     <title>Big Mouth</title>
-    
+
     <style>
       .fullscreenDiv {
         background-color: #05bafd;
@@ -373,9 +373,9 @@ elif [ "$1" = "deploy" ] && [ $# -eq 2 ]; then
   npm install
   zip -r workshop.zip functions static node_modules
 
-  MD5=$(md5 -q workshop.zip)
+  MD5=($(md5 -q workshop.zip || md5sum workshop.zip))
   aws s3 cp workshop.zip s3://ynap-production-ready-serverless-<your_name>/workshop/$MD5.zip
-  
+
   cd terraform
   terraform apply --var "my_name=<your_name>" --var "file_name=$MD5"
 else
@@ -560,7 +560,7 @@ resource "aws_api_gateway_deployment" "api" {
 }
 ```
 
-5. In the `terraform` folder, add a folder called `dynamodb.tf`.
+5. In the `terraform` folder, add a file called `dynamodb.tf`.
 
 6. Copy the following into `dynamodb.tf`
 
@@ -632,40 +632,40 @@ let restaurants = [
     image: "https://d2qt42rcwzspd6.cloudfront.net/manning/fangtasia.png",
     themes: ["true blood"]
   },
-  { 
-    name: "Shoney's", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/shoney's.png", 
-    themes: ["cartoon", "rick and morty"] 
+  {
+    name: "Shoney's",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/shoney's.png",
+    themes: ["cartoon", "rick and morty"]
   },
-  { 
-    name: "Freddy's BBQ Joint", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/freddy's+bbq+joint.png", 
-    themes: ["netflix", "house of cards"] 
+  {
+    name: "Freddy's BBQ Joint",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/freddy's+bbq+joint.png",
+    themes: ["netflix", "house of cards"]
   },
-  { 
-    name: "Pizza Planet", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/pizza+planet.png", 
-    themes: ["netflix", "toy story"] 
+  {
+    name: "Pizza Planet",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/pizza+planet.png",
+    themes: ["netflix", "toy story"]
   },
-  { 
-    name: "Leaky Cauldron", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/leaky+cauldron.png", 
-    themes: ["movie", "harry potter"] 
+  {
+    name: "Leaky Cauldron",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/leaky+cauldron.png",
+    themes: ["movie", "harry potter"]
   },
-  { 
-    name: "Lil' Bits", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/lil+bits.png", 
-    themes: ["cartoon", "rick and morty"] 
+  {
+    name: "Lil' Bits",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/lil+bits.png",
+    themes: ["cartoon", "rick and morty"]
   },
-  { 
-    name: "Fancy Eats", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/fancy+eats.png", 
-    themes: ["cartoon", "rick and morty"] 
+  {
+    name: "Fancy Eats",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/fancy+eats.png",
+    themes: ["cartoon", "rick and morty"]
   },
-  { 
-    name: "Don Cuco", 
-    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/don%20cuco.png", 
-    themes: ["cartoon", "rick and morty"] 
+  {
+    name: "Don Cuco",
+    image: "https://d2qt42rcwzspd6.cloudfront.net/manning/don%20cuco.png",
+    themes: ["cartoon", "rick and morty"]
   },
 ];
 
@@ -704,7 +704,7 @@ dynamodb.batchWrite(req).promise().then(() => console.log("all done"))
   <head>
     <meta charset="UTF-8">
     <title>Big Mouth</title>
-    
+
     <style>
       .fullscreenDiv {
         background-color: #05bafd;
@@ -862,7 +862,7 @@ function loadHtml () {
     html = fs.readFileSync('static/index.html', 'utf-8')
     console.log('loaded')
   }
-  
+
   return html
 }
 
@@ -1164,14 +1164,14 @@ and you should see that the response is
     <meta charset="UTF-8">
     <title>Big Mouth</title>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" 
-            integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX" 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    
+
     <style>
       .fullscreenDiv {
         background-color: #05bafd;
@@ -1318,7 +1318,7 @@ and you should see that the response is
                 </ul>
               </li>
               {{/restaurants}}
-            </ul> 
+            </ul>
           </div>
         </li>
       </ul>

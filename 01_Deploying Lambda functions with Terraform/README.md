@@ -127,7 +127,7 @@ You should see something like this in the console:
 
 14. Now we need to create the S3 bucket itself, run the following command **don't forget to replace the suffix with your name**
 
-`aws s3api create-bucket --bucket=ynap-production-ready-serverless-misu --region=eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1`
+`aws s3api create-bucket --bucket=ynap-production-ready-serverless-<suffix> --region=eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1`
 
 15. To upload the deployment artifact `workshop.zip`, run the following command **don't forget to replace the suffix with your name**
 
@@ -360,7 +360,7 @@ Clicking on the link should return an `Missing Authentication Token` error.
 
 Don't worry, this is API Gateway's way of saying the URL you requested does not exist (no, I don't know why it's not a 404 error instead...)
 
-6. Take the invoke URL from the previous step and add a subpath `/hello` and now it should return a JOSN payload.
+6. Take the invoke URL from the previous step and add a subpath `/hello` and now it should return a JSON payload.
 
 ![](/images/mod01-003.png)
 
