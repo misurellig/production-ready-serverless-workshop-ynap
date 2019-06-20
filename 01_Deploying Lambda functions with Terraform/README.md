@@ -47,7 +47,7 @@ module.exports.handler = async (event) => {
 
 ```terraform
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-central-1"
 }
 ```
 
@@ -62,7 +62,7 @@ resource "aws_lambda_function" "hello" {
   s3_bucket = "ynap-production-ready-serverless-${var.my_name}"
   s3_key    = "workshop.zip"
 
-  # "main" is the file within the zip file above (functions/hello.js) 
+  # "main" is the file within the zip file above (functions/hello.js)
   # "handler" is the name of the exported property in functions/hello.js
   handler = "functions/hello.handler"
   runtime = "nodejs8.10"
@@ -127,7 +127,7 @@ You should see something like this in the console:
 
 14. Now we need to create the S3 bucket itself, run the following command **don't forget to replace the suffix with your name**
 
-`aws s3api create-bucket --bucket=ynap-production-ready-serverless-<suffix> --region=us-east-1`
+`aws s3api create-bucket --bucket=ynap-production-ready-serverless-misu --region=eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1`
 
 15. To upload the deployment artifact `workshop.zip`, run the following command **don't forget to replace the suffix with your name**
 
@@ -237,7 +237,7 @@ Enter `yes` to continue.
 
 18. Now that your function is deployed. Let's invoke it, replace `xxx` with your name and run the following command
 
-`lambda invoke --region=us-east-1 --function-name=hello-ynap-xxx output.txt`
+`aws lambda invoke --region=eu-central-1 --function-name=hello-ynap-xxx output.txt`
 
 You should see
 
@@ -348,7 +348,7 @@ and enter `yes` when prompted to confirm the deployment.
 
 ![](/images/mod01-002.png)
 
-it should be of the format `https://xxx.execute-api.us-east-1.amazonaws.com/dev` where `xxx` is replaced with the ID of the REST API.
+it should be of the format `https://xxx.execute-api.eu-central-1.amazonaws.com/dev` where `xxx` is replaced with the ID of the REST API.
 
 Clicking on the link should return an `Missing Authentication Token` error.
 

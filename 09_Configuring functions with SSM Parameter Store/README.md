@@ -119,7 +119,7 @@ run().then(() => console.log("all done")).catch(err => console.error(err.message
 
 2. Rerun the script
 
-`STAGE=dev REGION=us-east-1 node seed-restaurants.js`
+`STAGE=dev REGION=eu-central-1 node seed-restaurants.js`
 
 and go to DynamoDB console to see that the newly created stage-specific table is now populated
 
@@ -191,7 +191,7 @@ module.exports = {
 
 2. Rerun the integration tests
 
-`STAGE=dev REGION=us-east-1 npm run test`
+`STAGE=dev REGION=eu-central-1 npm run test`
 
 and see that all the tests are passing
 
@@ -223,17 +223,17 @@ invoking via handler function search-restaurants
 
 3. Rerun the acceptance tests
 
-`STAGE=dev REGION=us-east-1 npm run acceptance`
+`STAGE=dev REGION=eu-central-1 npm run acceptance`
 
 ```
   When we invoke the GET / endpoint
 SSM params loaded
 AWS credential loaded
-invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/
+invoking via HTTP GET https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/
     ✓ Should return the index page with 8 restaurants (916ms)
 
   When we invoke the GET /restaurants endpoint
-invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/restaurants
+invoking via HTTP GET https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/restaurants
     ✓ Should return an array of 8 restaurants (341ms)
 
   Given an authenticated user
@@ -241,7 +241,7 @@ invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev
 [test-Viola-Brewer-keQeBQHj] - initialised auth flow
 [test-Viola-Brewer-keQeBQHj] - responded to auth challenge
     When we invoke the POST /restaurants/search endpoint with theme 'cartoon'
-invoking via HTTP POST https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/restaurants/search
+invoking via HTTP POST https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/restaurants/search
       ✓ Should return an array of 4 restaurants (1514ms)
 [test-Viola-Brewer-keQeBQHj] - user deleted
 

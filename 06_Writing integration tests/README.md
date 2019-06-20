@@ -170,7 +170,7 @@ const init = async () => {
 
   process.env.restaurants_api      = "<invoke URL>/restaurants"
   process.env.restaurants_table    = "<your table name>"
-  process.env.AWS_REGION           = "us-east-1"
+  process.env.AWS_REGION           = "eu-central-1"
   
   const { credentials } = await promisify(awscred.load)()
   

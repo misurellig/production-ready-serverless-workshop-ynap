@@ -38,7 +38,7 @@ resource "aws_iam_policy" "get_index_lambda_apigateway_policy" {
     {
       "Effect": "Allow",
       "Action": "execute-api:Invoke",
-      "Resource": "arn:aws:execute-api:us-east-1:${data.aws_caller_identity.current.account_id}:*/*/GET/restaurants"
+      "Resource": "arn:aws:execute-api:eu-central-1:${data.aws_caller_identity.current.account_id}:*/*/GET/restaurants"
     }
   ]
 }

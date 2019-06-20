@@ -139,10 +139,10 @@ const init = async () => {
     return
   }
 
-  process.env.TEST_ROOT = "https://xxx.execute-api.us-east-1.amazonaws.com/dev"
-  process.env.restaurants_api = "https://xxx.execute-api.us-east-1.amazonaws.com/dev/restaurants"
+  process.env.TEST_ROOT = "https://xxx.execute-api.eu-central-1.amazonaws.com/dev"
+  process.env.restaurants_api = "https://xxx.execute-api.eu-central-1.amazonaws.com/dev/restaurants"
   process.env.restaurants_table = "<replace with your table>"
-  process.env.AWS_REGION = "us-east-1"
+  process.env.AWS_REGION = "eu-central-1"
   
   const { credentials } = await promisify(awscred.load)()
   
@@ -177,7 +177,7 @@ and see that the `get-index` function is failing
 ```
   When we invoke the GET / endpoint
 AWS credential loaded
-invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/
+invoking via HTTP GET https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/
     1) Should return the index page with 8 restaurants
 
   1) When we invoke the GET / endpoint
@@ -234,7 +234,7 @@ and see that the `get-index` function is now passing
 ```
   When we invoke the GET / endpoint
 AWS credential loaded
-invoking via HTTP GET https://sr73zpk0el.execute-api.us-east-1.amazonaws.com/dev/
+invoking via HTTP GET https://sr73zpk0el.execute-api.eu-central-1.amazonaws.com/dev/
     ✓ Should return the index page with 8 restaurants (658ms)
 ```
 
@@ -265,11 +265,11 @@ and see that both `get-index` and `get-restaurants` tests are passing
 ```
   When we invoke the GET / endpoint
 AWS credential loaded
-invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/
+invoking via HTTP GET https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/
     ✓ Should return the index page with 8 restaurants (632ms)
 
   When we invoke the GET /restaurants endpoint
-invoking via HTTP GET https://exun14zd2h.execute-api.us-east-1.amazonaws.com/dev/restaurants
+invoking via HTTP GET https://exun14zd2h.execute-api.eu-central-1.amazonaws.com/dev/restaurants
     ✓ Should return an array of 8 restaurants (380ms)
 ```
 
@@ -304,15 +304,15 @@ and see that all 3 tests are passing
 ```
   When we invoke the GET / endpoint
 AWS credential loaded
-invoking via HTTP GET https://sr73zpk0el.execute-api.us-east-1.amazonaws.com/dev/
+invoking via HTTP GET https://sr73zpk0el.execute-api.eu-central-1.amazonaws.com/dev/
     ✓ Should return the index page with 8 restaurants (1196ms)
 
   When we invoke the GET /restaurants endpoint
-invoking via HTTP GET https://sr73zpk0el.execute-api.us-east-1.amazonaws.com/dev/restaurants
+invoking via HTTP GET https://sr73zpk0el.execute-api.eu-central-1.amazonaws.com/dev/restaurants
     ✓ Should return an array of 8 restaurants (394ms)
 
   When we invoke the POST /restaurants/search endpoint with theme 'cartoon'
-invoking via HTTP POST https://sr73zpk0el.execute-api.us-east-1.amazonaws.com/dev/restaurants/search
+invoking via HTTP POST https://sr73zpk0el.execute-api.eu-central-1.amazonaws.com/dev/restaurants/search
     ✓ Should return an array of 4 restaurants (2138ms)
 
 

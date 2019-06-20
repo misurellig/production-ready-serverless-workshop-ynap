@@ -623,7 +623,7 @@ resource "aws_iam_role_policy_attachment" "get_restaurants_lambda_dynamodb_polic
 
 ```javascript
 const AWS = require('aws-sdk')
-AWS.config.region = 'us-east-1'
+AWS.config.region = 'eu-central-1'
 const dynamodb = new AWS.DynamoDB.DocumentClient()
 
 let restaurants = [
@@ -905,7 +905,7 @@ resource "aws_lambda_function" "get_index" {
 
   environment {
     variables = {
-      restaurants_api = "https://${aws_api_gateway_rest_api.api.id}.execute-api.us-east-1.amazonaws.com/${var.stage}/restaurants"
+      restaurants_api = "https://${aws_api_gateway_rest_api.api.id}.execute-api.eu-central-1.amazonaws.com/${var.stage}/restaurants"
     }
   }
 }
@@ -1109,7 +1109,7 @@ resource "aws_api_gateway_deployment" "api" {
 
 6. Once the deployment is done, curl the `/restaurants/search` endpoint for the `cartoon` theme. **Don't forget to change the url to invoke URL from the Terraform output**
 
-`curl -d '{"theme":"cartoon"}' -H "Content-Type: application/json" -X POST https://xxx-api.us-east-1.amazonaws.com/dev/restaurants/search`
+`curl -d '{"theme":"cartoon"}' -H "Content-Type: application/json" -X POST https://xxx-api.eu-central-1.amazonaws.com/dev/restaurants/search`
 
 and you should see that the response is
 
