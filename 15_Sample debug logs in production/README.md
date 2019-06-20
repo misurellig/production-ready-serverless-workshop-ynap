@@ -500,4 +500,26 @@ invoking via handler function search-restaurants
 
 `STAGE=dev REGION=us-east-1 npm run acceptance`
 
+12. Since the debug logs are now sampled at 1% chance, it means we won't see many logs. This is the desired behaviour in production, but not very useful for this workshop!
+
+Luckily, we can control the sample rate with the environment variable `SAMPLE_DEBUG_LOG_RATE`.
+
+Open the following files:
+
+* `terraform/get-index.tf`
+* `terraform/get-restaurants.tf`
+* `terraform/notify-restaurant.tf`
+* `terraform/place-order.tf`
+
+and add the environment variable to the function definition, maybe set it to 50%, e.g.
+
+```terraform
+environment {
+  variables = {
+    LOG_LEVEL = "${var.log_level}"
+    SAMPLE_DEBUG_LOG_RATE = "0.50"
+  }
+}
+```
+
 </p></details>
