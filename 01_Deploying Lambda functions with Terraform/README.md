@@ -313,11 +313,17 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "dev"
+  stage_name  = ""
 
   variables {
     deployed_at = "${timestamp()}"
   }
+}
+
+resource "aws_api_gateway_stage" "stage" {
+  stage_name           = "${var.stage}"
+  rest_api_id          = "${aws_api_gateway_rest_api.api.id}"
+  deployment_id        = "${aws_api_gateway_deployment.api.id}"
 }
 
 resource "aws_lambda_permission" "apigw" {
@@ -328,7 +334,7 @@ resource "aws_lambda_permission" "apigw" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 

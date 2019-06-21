@@ -30,7 +30,7 @@ resource "aws_ssm_parameter" "table_name" {
 resource "aws_ssm_parameter" "url" {
   name = "/big-mouth-${var.my_name}/${var.stage}/url"
   type = "String"
-  value = "${aws_api_gateway_deployment.api.invoke_url}"
+  value = "${aws_api_gateway_stage.stage.invoke_url}"
 }
 
 resource "aws_ssm_parameter" "stream_name" {
@@ -201,7 +201,7 @@ resource "aws_lambda_permission" "apigw_place_order" {
   function_name = "${aws_lambda_function.place_order.arn}"
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "${aws_api_gateway_deployment.api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_stage.stage.execution_arn}/*/*"
 }
 ```
 
@@ -221,7 +221,7 @@ resource "aws_api_gateway_deployment" "api" {
   }
 
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  stage_name  = "${var.stage}"
+  stage_name  = ""
 
   variables {
     deployed_at = "${timestamp()}"

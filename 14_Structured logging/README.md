@@ -11,7 +11,7 @@ One of the tools available is a very simple logger that supports structured logg
 
 So, first, let's install the logger for our project.
 
-1. At the project root, run the command `npm install @perform/lambda-powertools-logger` to install the logger.
+1. At the project root, run the command `npm install --save @perform/lambda-powertools-logger` to install the logger.
 
 Now we need to change all the places where we're using `console.log`.
 
@@ -254,6 +254,7 @@ resource "aws_lambda_function" "get_index" {
   runtime = "nodejs8.10"
 
   role = "${aws_iam_role.get_index_lambda_role.arn}"
+  timeout = 6
 
   environment {
     variables = {

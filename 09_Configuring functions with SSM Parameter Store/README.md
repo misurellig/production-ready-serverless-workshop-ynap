@@ -23,7 +23,7 @@ resource "aws_ssm_parameter" "table_name" {
 resource "aws_ssm_parameter" "url" {
   name = "/big-mouth-${var.my_name}/${var.stage}/url"
   type = "String"
-  value = "${aws_api_gateway_deployment.api.invoke_url}"
+  value = "${aws_api_gateway_stage.stage.invoke_url}"
 }
 ```
 
